@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="video" default="$(find tfpose_ros)/etcs/dance.mp4" />
-    <arg name="video_width" default="1280" />
+    <arg name="video_width" default="1120" />
     <arg name="video_height" default="720" />
 
     <arg name="gpuid" default="0" />
@@ -10,19 +10,17 @@
     <arg name="model" default="mobilenet_thin" />
     
     <!-- <arg name="model" default="cmu" /> -->
-    <arg name="node" default="/top_front_camera/image_raw" />
+    <arg name="node" default="/csi_cam_0/image_raw" />
     <arg name="resolution" default="432x368" />
 
     <node name="pose_estimator" pkg="tfpose_ros" type="broadcaster_ros.py" output="screen" required="true">
         <env name="CUDA_VISIBLE_DEVICES" value="$(arg gpuid)" />
-        <!-- <param name="camera" value="/videofile/image_raw" /> -->
     	<param name="camera" value="$(arg node)"	/>
         <param name="model" value="$(arg model)" />
         <param name="resolution" value="$(arg resolution)" />
     </node>
 
     <node name="pose_estimator_vis" pkg="tfpose_ros" type="visualization.py" output="screen" required="true">
-        <!-- <param name="camera" value="/videofile/image_raw" /> -->
     	<param name="camera" value="$(arg node)" />
         <param name="pose" value="/pose_estimator/pose" />
     </node>
@@ -32,6 +30,18 @@
         <param name="autosize" value="true" />
     </node>
 
+    <node name="monocular_people_tracking" pkg="monocular_people_tracking" type="monocular_people_tracking_node">
+        <param name="camera" value="$(arg node)" />
+    </node>
+
+    <node name="image_republish" pkg="image_transport" type="republish" args="compressed raw">
+        <remap from="in" to="$(arg node)" />
+        <remap from="out" to="$(arg node)" />
+    </node>
+
+   <node pkg="tf" type="static_transform_publisher" name="base_footprint_broadcaster" args="0 0 0 0 0 0 odom base_footprint 100" />
+   <node pkg="tf" type="static_transform_publisher" name="csi_cam_0_link_broadcaster" args="0 0 0 0 0 0 base_link csi_cam_0_link 100" />
+
     <node name="video_recorder" pkg="video_recorder" type="recorder.py" output="screen" required="true">
         <param name="output_width" type="int" value="640" />
         <param name="output_height" type="int" value="720" />
@@ -40,8 +50,6 @@
 
         <param name="output_topic" value="~output" />
 
-   		<!-- <param name="source1" value="/videofile/image_raw,0,0,640,360" /> --> 
-   		<!-- <param name="source1" value="/camera/image_mono,0,0,640,360" /> --><!-- use camera -->
    		<param name="source1" value="$(arg node),0,0,640,360" />
         <param name="source2" value="/pose_estimator_vis/output,0,360,640,360" />
     </node>

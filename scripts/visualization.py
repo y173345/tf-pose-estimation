@@ -73,6 +73,8 @@ if __name__ == '__main__':
 
     # topics params
     image_topic = rospy.get_param('~camera', '')
+    # image_topic = '/camera/image_mono'  # use in camera
+    # image_topic = '/top_front_camera/image_raw'  # use in bag
     pose_topic = rospy.get_param('~pose', '/pose_estimator/pose')
 
     resize_ratio = float(rospy.get_param('~resize_ratio', '-1'))

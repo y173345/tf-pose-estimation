@@ -67,7 +67,8 @@ if __name__ == '__main__':
 
     # parameters
     image_topic = rospy.get_param('~camera', '')
-    model = rospy.get_param('~model', 'cmu')
+    # model = rospy.get_param('~model', 'cmu')
+    model = rospy.get_param('~model', 'mobilenet_thin')
 
     resolution = rospy.get_param('~resolution', '432x368')
     resize_out_ratio = float(rospy.get_param('~resize_out_ratio', '4.0'))
@@ -90,7 +91,9 @@ if __name__ == '__main__':
     pose_estimator = TfPoseEstimator(graph_path, target_size=(w, h))
     cv_bridge = CvBridge()
 
-    rospy.Subscriber(image_topic, Image, callback_image, queue_size=1, buff_size=2**24)
+    rospy.Subscriber(image_topic, Image, callback_image, queue_size=1, buff_size=2**24)	
+    # rospy.Subscriber('/camera/image_mono', Image, callback_image, queue_size=1, buff_size=2**24)	# use in camera
+    # rospy.Subscriber('/top_front_camera/image_raw', Image, callback_image, queue_size=1, buff_size=2**24)
     pub_pose = rospy.Publisher('~pose', Persons, queue_size=1)
 
     rospy.loginfo('start+')
